@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 
+// const isOpen = ref(false);
 const sectionRef = ref<HTMLElement | null>(null);
 const isVisible = ref<boolean>(false);
 
@@ -19,6 +20,42 @@ onMounted(() => {
     observer.observe(sectionRef.value);
   }
 });
+
+const scrollToSection = (sectionId: string) => {
+  //   isOpen.value = false;
+  const element = document.getElementById(sectionId);
+  if (!element) return;
+
+  const startPosition =
+    window.pageYOffset || document.documentElement.scrollTop;
+  const targetPosition = element.getBoundingClientRect().top + startPosition;
+  const distance = targetPosition - startPosition;
+
+  const duration = 1800;
+  let startTime: number | null = null;
+
+  const animation = (currentTime: number) => {
+    if (startTime === null) startTime = currentTime;
+    const timeElapsed = currentTime - startTime;
+
+    const progress = Math.min(timeElapsed / duration, 1);
+    const ease =
+      progress < 0.5
+        ? 2 * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+    window.scrollTo(0, startPosition + distance * ease);
+
+    if (timeElapsed < duration) {
+      window.requestAnimationFrame(animation);
+    } else {
+      window.scrollTo(0, targetPosition);
+      window.history.replaceState(null, "", `#${sectionId}`);
+    }
+  };
+
+  window.requestAnimationFrame(animation);
+};
 </script>
 
 <template>
@@ -80,13 +117,15 @@ onMounted(() => {
         ]"
       >
         <a
-          href="#projects"
+          href="#proyectos"
+          @click.prevent="scrollToSection('proyectos')"
           class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-medium shadow-lg shadow-emerald-600/25 dark:shadow-emerald-500/20 transition-all hover:scale-[1.02]"
         >
           Ver proyectos
         </a>
         <a
-          href="#contact"
+          href="#contacto"
+          @click.prevent="scrollToSection('contacto')"
           class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-emerald-200/80 dark:border-slate-700 font-medium transition-all hover:scale-[1.02] shadow-sm"
         >
           Contáctame

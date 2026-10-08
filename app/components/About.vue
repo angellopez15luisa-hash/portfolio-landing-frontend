@@ -30,6 +30,42 @@ onUnmounted(() => {
     observer.unobserve(sectionRef.value)
   }
 })
+
+const scrollToSection = (sectionId: string) => {
+  //   isOpen.value = false;
+  const element = document.getElementById(sectionId);
+  if (!element) return;
+
+  const startPosition =
+    window.pageYOffset || document.documentElement.scrollTop;
+  const targetPosition = element.getBoundingClientRect().top + startPosition;
+  const distance = targetPosition - startPosition;
+
+  const duration = 1800;
+  let startTime: number | null = null;
+
+  const animation = (currentTime: number) => {
+    if (startTime === null) startTime = currentTime;
+    const timeElapsed = currentTime - startTime;
+
+    const progress = Math.min(timeElapsed / duration, 1);
+    const ease =
+      progress < 0.5
+        ? 2 * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+    window.scrollTo(0, startPosition + distance * ease);
+
+    if (timeElapsed < duration) {
+      window.requestAnimationFrame(animation);
+    } else {
+      window.scrollTo(0, targetPosition);
+      window.history.replaceState(null, "", `#${sectionId}`);
+    }
+  };
+
+  window.requestAnimationFrame(animation);
+};
 </script>
 
 <template>
@@ -117,6 +153,7 @@ onUnmounted(() => {
           <div class="pt-2">
             <a
               href="#contact"
+               @click.prevent="scrollToSection('contacto')"
               class="w-full inline-block text-center px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-medium text-sm transition-all hover:scale-[1.02] shadow-sm shadow-indigo-600/20"
             >
               ¡Conversemos sobre tu proyecto!
